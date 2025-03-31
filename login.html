@@ -53,28 +53,40 @@
     </div>
 
     <script>
-        // دالة لتسجيل الدخول
+        // إضافة حسابات افتراضية عند تحميل الصفحة لأول مرة
+        window.onload = function() {
+            const users = JSON.parse(localStorage.getItem("users")) || [];
+
+            if (users.length === 0) {
+                const defaultUsers = [
+                    { username: "admin", phone: "01234567890", password: "admin123", role: "admin" },
+                    { username: "user123", phone: "01111111111", password: "password123", role: "user" }
+                ];
+                localStorage.setItem("users", JSON.stringify(defaultUsers));
+            }
+        };
+
+        // تسجيل الدخول
         document.getElementById("login-form").addEventListener("submit", function(event) {
             event.preventDefault();
 
             const usernameOrPhone = document.getElementById("username").value.trim();
             const password = document.getElementById("password").value.trim();
+            const users = JSON.parse(localStorage.getItem("users")) || [];
 
-            // إنشاء مستخدم افتراضي (أو تحميل مستخدم من البيانات المخزنة)
-            const storedUser = {
-                username: "user123",
-                password: "password123",
-                role: "user" // أو "admin" حسب الحاجة
-            };
+            // البحث عن المستخدم في القائمة
+            const user = users.find(u => (u.username === usernameOrPhone || u.phone === usernameOrPhone) && u.password === password);
 
-            // التحقق من بيانات الدخول
-            if (usernameOrPhone === storedUser.username && password === storedUser.password) {
-                // تخزين الجلسة
-                localStorage.setItem("currentUser", JSON.stringify(storedUser));
-                alert("مرحبًا " + storedUser.username);
-                
-                // توجيه المستخدم إلى الصفحة المناسبة بناءً على دوره
-                window.location.href = "dashboard.html";  // أو أي صفحة أخرى
+            if (user) {
+                localStorage.setItem("currentUser", JSON.stringify(user));
+                alert("مرحبًا " + user.username);
+
+                // توجيه المستخدم حسب دوره
+                if (user.role === "admin") {
+                    window.location.href = "admin_dashboard.html";
+                } else {
+                    window.location.href = "dashboard.html";
+                }
             } else {
                 alert("❌ اسم المستخدم أو كلمة المرور غير صحيحة!");
             }
