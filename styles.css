@@ -1,80 +1,55 @@
-/* خلفية متحركة بألوان نيون */
-@keyframes neonBackground {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
+<script>
+    function setCookie(name, value, days) {
+        let expires = "";
+        if (days) {
+            let date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            expires = "; expires=" + date.toUTCString();
+        }
+        document.cookie = name + "=" + value + "; path=/" + expires;
+    }
 
-body {
-    font-family: Arial, sans-serif;
-    background: linear-gradient(45deg, #0f0c29, #302b63, #24243e);
-    background-size: 400% 400%;
-    animation: neonBackground 10s infinite;
-    color: white;
-    text-align: center;
-    margin: 0;
-    padding: 0;
-}
+    function getCookie(name) {
+        let nameEQ = name + "=";
+        let ca = document.cookie.split(';');
+        for (let i = 0; i < ca.length; i++) {
+            let c = ca[i].trim();
+            if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+        }
+        return null;
+    }
 
-/* ستايل الحاويات */
-.container {
-    margin: auto;
-    width: 80%;
-    padding: 20px;
-    background: rgba(0, 0, 0, 0.6);
-    border-radius: 15px;
-    box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
-    transition: transform 0.3s;
-}
+    document.getElementById("login-form").addEventListener("submit", function(event) {
+        event.preventDefault();
 
-.container:hover {
-    transform: scale(1.02);
-}
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value.trim();
 
-/* زرار نيون متحرك */
-button {
-    background: linear-gradient(90deg, #00ffcc, #ff00ff);
-    border: none;
-    padding: 10px 20px;
-    font-size: 18px;
-    color: white;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: 0.3s;
-    box-shadow: 0 0 10px #00ffcc;
-}
+        // بيانات المستخدمين المخزنة محليًا
+        const users = JSON.parse(localStorage.getItem("users")) || [];
 
-button:hover {
-    box-shadow: 0 0 20px #ff00ff;
-    transform: scale(1.05);
-}
+        const user = users.find(u => u.username === username && u.password === password);
 
-/* تأثيرات الإدخال */
-input {
-    width: 90%;
-    padding: 10px;
-    margin: 10px 0;
-    border: none;
-    border-radius: 5px;
-    background: #2e2e2e;
-    color: white;
-    font-size: 16px;
-    text-align: center;
-    box-shadow: 0 0 5px #00ffcc;
-    transition: 0.3s;
-}
+        if (user) {
+            setCookie("loggedInUser", username, 7); // تسجيل الدخول يبقى لمدة 7 أيام
+            alert("✅ تسجيل الدخول ناجح!");
 
-input:focus {
-    box-shadow: 0 0 10px #ff00ff;
-    outline: none;
-}
+            if (user.role === "admin") {
+                window.location.href = "admin_dashboard.html";
+            } else {
+                window.location.href = "lawyer_dashboard.html";
+            }
+        } else {
+            alert("❌ اسم المستخدم أو كلمة المرور غير صحيحة!");
+        }
+    });
 
-/* أنيميشن عند تحميل الصفحة */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.container, button, input {
-    animation: fadeIn 1s ease-in-out;
-}
+    // عند تحميل الصفحة، إنشاء حساب Admin إذا لم يكن موجودًا
+    window.onload = function() {
+        const users = JSON.parse(localStorage.getItem("users")) || [];
+        if (users.length === 0) {
+            users.push({ username: "admin", password: "admin123", role: "admin" });
+            localStorage.setItem("users", JSON.stringify(users));
+        }
+    };
+</script>
